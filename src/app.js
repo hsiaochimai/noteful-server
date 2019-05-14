@@ -6,6 +6,7 @@ const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
 const winston = require('winston');
 const foldersRouter = require ('./folders/folders-router')
+const notesRouter= require ('./notes/notes-router')
 const app = express()
 const logger = winston.createLogger({
   level: 'info',
@@ -34,7 +35,7 @@ app.use(function validateBearerToken(req, res, next) {
 })
 
 app.use('/api/folders', foldersRouter)
-
+app.use('/api/notes', notesRouter)
 app.use(function errorHandler(error, req, res, next) {
     let response
      if (NODE_ENV === 'production') {
