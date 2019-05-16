@@ -30,9 +30,10 @@ foldersRouter
         });
       }
     }
-     
+     console.log(`sdkfjskdlfjs`, newFolder)
     FoldersService.insertFolder(req.app.get("db"), newFolder)
       .then(folder => {
+        console.log(`aksjdalksjd`,folder)
         res
           .status(201)
           .location(path.posix.join(req.originalUrl, `/${folder.id}`))
