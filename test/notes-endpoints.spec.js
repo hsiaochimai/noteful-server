@@ -130,14 +130,16 @@ describe("Notes Endpoints", function() {
     });
     describe.only(`POST /api/notes`, () => {
       const testNotes = makeNotesArray();
-      beforeEach('insert notes', () => {
-        return db
-          .into('noteful_notes')
-          .insert(testNotes) 
-      })
-  
+      const testFolders= makeFoldersArray();
+      beforeEach("insert folders and notes", () => {
+        return db.into('noteful_folders')
+        .insert(testFolders)
+        .then(() => {
+        
+        })
+    })
       it(`creates an note, responding with 201 and the new note`, function() {
-        this.retries(3);
+        
         const newNote = {
           note_name: "Test new note",
           folder_id: 1,
@@ -148,13 +150,14 @@ describe("Notes Endpoints", function() {
           .send(newNote)
           .expect(201)
           .expect(res => {
+              console.log(res)
             expect(res.body.note_name).to.eql(newNote.note_name);
             expect(res.body.folder_id).to.eql(newNote.folder_id)
             expect(res.body.content).to.eql(newNote.content);
             expect(res.body).to.have.property("id");
             expect(res.headers.location).to.eql(`/api/notes/${res.body.id}`);
             const expected = new Date().toLocaleString();
-            const actual = new Date(res.body.date_published).toLocaleString(
+            const actual = new Date(res.body.modified).toLocaleString(
               "en",
               { timeZone: "UTC" }
             );
@@ -166,12 +169,12 @@ describe("Notes Endpoints", function() {
               .expect(postRes.body)
           );
       });
-      const requiredFields = ["note_name", "style", "content"];
+      const requiredFields = ["note_name", "folder_id", "content"];
   
       requiredFields.forEach(field => {
         const newNote = {
           note_name: "Test new note",
-          style: "Listicle",
+          folder_id: 1,
           content: "Test new note content..."
         };
   
@@ -195,6 +198,7 @@ describe("Notes Endpoints", function() {
           .expect(res => {
             expect(res.body.note_name).to.eql(expectedNote.note_name);
             expect(res.body.content).to.eql(expectedNote.content);
+            expect(res.body).to.have.property("id");
           });
       });
     });
