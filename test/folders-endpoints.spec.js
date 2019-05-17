@@ -128,34 +128,35 @@ context(`Given an XSS attack folder`, () => {
   });
 });
 })
-// describe.only(`POST /api/folders`, () => {
-//   const testFolders = makeFoldersArray();
-//   beforeEach('insert new folder', () => {
-//     return db
-//       .into('noteful_folders')
-//       .insert(testFolders) 
-//   })
+describe.only(`POST /api/folders`, () => {
+  // const testFolders = makeFoldersArray();
+  // beforeEach('insert new folder', () => {
+  //   return db
+  //     .into('noteful_folders')
+  //     .insert(testFolders) 
+  // })
 
-//   it(`creates a folder, responding with 201 and the new folder`, function() {
-//     this.retries(3);
-//     const newFolder = {
-//       folder_name: "Test new folder",
-//     };
-//     return supertest(app)
-//       .post("/api/folders")
-//       .send(newFolder)
-//       .expect(201)
-//       .expect(res => {
-//         expect(res.body.folder_name).to.eql(newFolder.folder_name);
-//         expect(res.headers.location).to.eql(`/api/folders/${newFolder.id}`);
-//       })
-//       .then(postRes =>
-//         supertest(app)
-//           .get(`/api/folders/${postRes.body.id}`)
-//           .expect(postRes.body)
-//       );
-//   });
-// })
+  it(`creates a folder, responding with 201 and the new folder`, function() {
+    this.retries(3);
+    const newFolder = {
+      folder_name: "Test new folder",
+    };
+    return supertest(app)
+      .post("/api/folders")
+      .send(newFolder)
+      .expect(201)
+      .expect(res => {
+        console.log(`dfksjdfsljdkf`,res.body)
+        expect(res.body.folder_name).to.eql(newFolder.folder_name);
+        expect(res.headers.location).to.eql(`/api/folders/${res.body.id}`);
+      })
+      .then(postRes =>
+        supertest(app)
+          .get(`/api/folders/${postRes.body.id}`)
+          .expect(postRes.body)
+      );
+  });
+})
 describe.only(`DELETE /api/folders/:folder_id`, () => {
   context(`Given no folders`, () => {
     it(`responds with 404`, () => {
