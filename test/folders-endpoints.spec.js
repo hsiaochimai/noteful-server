@@ -2,6 +2,7 @@ const { expect } = require("chai");
 const knex = require("knex");
 const app = require("../src/app");
 const { makeFoldersArray, makeMaliciousFolder } = require("./folders.fixture");
+const { API_TOKEN } = process.env;
 
 describe("Folders Endpoints", function() {
   let db;
@@ -32,6 +33,7 @@ describe("Folders Endpoints", function() {
       it(`responds with 200 and an empty list`, () => {
         return supertest(app)
           .get("/api/folders")
+          .set("Authorization", `Bearer ${API_TOKEN}`)
           .expect(200, []);
       });
     });
@@ -48,6 +50,7 @@ describe("Folders Endpoints", function() {
       it("GET /api/folders responds with 200 and all of the folders", () => {
         return supertest(app)
           .get("/api/folders")
+          .set("Authorization", `Bearer ${API_TOKEN}`)
           .expect(200, testFolders);
       });
     });
@@ -67,6 +70,7 @@ describe("Folders Endpoints", function() {
       it("removes XSS attack content", () => {
         return supertest(app)
           .get(`/api/folders`)
+          .set("Authorization", `Bearer ${API_TOKEN}`)
           .expect(200)
           .expect(res => {
             expect(res.body[0].folder_name).to.eql(expectedFolder.folder_name);
@@ -81,6 +85,7 @@ describe.only(`GET /api/folders/:folder_id `, () => {
       const folder_id = 123456;
       return supertest(app)
         .get(`/api/folders/${folder_id}`)
+        .set("Authorization", `Bearer ${API_TOKEN}`)
         .expect(404, { error: { message: `Folder doesn't exist` } });
     });
 
@@ -99,6 +104,7 @@ context("Given there are folders in the database", () => {
         const expectedFolder = testFolders[folderId - 1];
         return supertest(app)
           .get(`/api/folders/${folderId}`)
+          .set("Authorization", `Bearer ${API_TOKEN}`)
           .expect(200, expectedFolder);
       });
 
@@ -121,6 +127,7 @@ context(`Given an XSS attack folder`, () => {
   it("removes XSS attack content", () => {
     return supertest(app)
       .get(`/api/folders/${maliciousFolder.id}`)
+      .set("Authorization", `Bearer ${API_TOKEN}`)
       .expect(200)
       .expect(res => {
         expect(res.body.folder_name).to.eql(expectedFolder.folder_name);
@@ -129,13 +136,6 @@ context(`Given an XSS attack folder`, () => {
 });
 })
 describe.only(`POST /api/folders`, () => {
-  // const testFolders = makeFoldersArray();
-  // beforeEach('insert new folder', () => {
-  //   return db
-  //     .into('noteful_folders')
-  //     .insert(testFolders) 
-  // })
-
   it(`creates a folder, responding with 201 and the new folder`, function() {
     this.retries(3);
     const newFolder = {
@@ -144,6 +144,7 @@ describe.only(`POST /api/folders`, () => {
     return supertest(app)
       .post("/api/folders")
       .send(newFolder)
+      .set("Authorization", `Bearer ${API_TOKEN}`)
       .expect(201)
       .expect(res => {
         console.log(`dfksjdfsljdkf`,res.body)
@@ -153,6 +154,7 @@ describe.only(`POST /api/folders`, () => {
       .then(postRes =>
         supertest(app)
           .get(`/api/folders/${postRes.body.id}`)
+          .set("Authorization", `Bearer ${API_TOKEN}`)
           .expect(postRes.body)
       );
   });
@@ -163,6 +165,7 @@ describe.only(`DELETE /api/folders/:folder_id`, () => {
       const folderId = 123456;
       return supertest(app)
         .delete(`/api/folders/${folderId}`)
+        .set("Authorization", `Bearer ${API_TOKEN}`)
         .expect(404, { error: { message: `Folder doesn't exist` } });
     });
   });
@@ -183,10 +186,12 @@ describe.only(`DELETE /api/folders/:folder_id`, () => {
       );
       return supertest(app)
         .delete(`/api/folders/${idToRemove}`)
+        .set("Authorization", `Bearer ${API_TOKEN}`)
         .expect(204)
         .then(res =>
           supertest(app)
             .get(`/api/folders`)
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .expect(expectedFolders)
         );
     });
@@ -198,6 +203,7 @@ describe.only(`PATCH /api/folders/:folder_id`, () => {
       const folderId = 123456;
       return supertest(app)
         .patch(`/api/folders/${folderId}`)
+        .set("Authorization", `Bearer ${API_TOKEN}`)
         .expect(404, { error: { message: `Folder doesn't exist` } });
     });
   });
@@ -223,11 +229,13 @@ describe.only(`PATCH /api/folders/:folder_id`, () => {
       };
       return supertest(app)
         .patch(`/api/folders/${idToUpdate}`)
+        .set("Authorization", `Bearer ${API_TOKEN}`)
         .send(updateFolder)
         .expect(204)
         .then(res =>
           supertest(app)
             .get(`/api/folders/${idToUpdate}`)
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .expect(expectedFolder)
         );
     });
@@ -235,6 +243,7 @@ describe.only(`PATCH /api/folders/:folder_id`, () => {
            const idToUpdate = 2
            return supertest(app)
              .patch(`/api/folders/${idToUpdate}`)
+             .set("Authorization", `Bearer ${API_TOKEN}`)
              .send({ irrelevantField: 'foo' })
              .expect(400, {
                error: {
@@ -258,10 +267,12 @@ describe.only(`PATCH /api/folders/:folder_id`, () => {
                       ...updateFolder,
                       fieldToIgnore: 'should not be in GET response'
                     })
+                    .set("Authorization", `Bearer ${API_TOKEN}`)
                     .expect(204)
                     .then(res =>
                       supertest(app)
                         .get(`/api/folders/${idToUpdate}`)
+                        .set("Authorization", `Bearer ${API_TOKEN}`)
                         .expect(expectedFolder)
                     )
                 })

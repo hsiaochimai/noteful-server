@@ -3,6 +3,7 @@ const knex = require("knex");
 const app = require("../src/app");
 const {makeNotesArray, makeMaliciousNote}= require ("./notes.fixture")
 const {makeFoldersArray} = require('./folders.fixture')
+const { API_TOKEN } = process.env;
 
 describe("Notes Endpoints", function() {
     let db;
@@ -25,6 +26,7 @@ describe("Notes Endpoints", function() {
         it(`responds with 200 and an empty list`, () => {
           return supertest(app)
             .get("/api/notes")
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .expect(200, []);
         });
       });
@@ -44,6 +46,7 @@ describe("Notes Endpoints", function() {
         it("GET /api/notes responds with 200 and all of the notes", () => {
           return supertest(app)
             .get("/api/notes")
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .expect(200, testNotes);
         });
       });
@@ -65,6 +68,7 @@ describe("Notes Endpoints", function() {
         it("removes XSS attack content", () => {
           return supertest(app)
             .get(`/api/notes`)
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .expect(200)
             .expect(res => {
               expect(res.body[0].note_name).to.eql(expectedNote.note_name);
@@ -79,6 +83,7 @@ describe("Notes Endpoints", function() {
           const noteId = 123457;
           return supertest(app)
             .get(`/api/notes/${noteId}`)
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .expect(404, { error: { message: `Note doesn't exist` } });
         });
       });
@@ -99,6 +104,7 @@ describe("Notes Endpoints", function() {
           const expectedNote = testNotes[noteId - 1];
           return supertest(app)
             .get(`/api/notes/${noteId}`)
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .expect(200, expectedNote);
         });
       });
@@ -120,6 +126,7 @@ describe("Notes Endpoints", function() {
         it("removes XSS attack content", () => {
           return supertest(app)
             .get(`/api/notes/${maliciousNote.id}`)
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .expect(200)
             .expect(res => {
               expect(res.body.note_name).to.eql(expectedNote.note_name);
@@ -129,7 +136,6 @@ describe("Notes Endpoints", function() {
       });
     });
     describe.only(`POST /api/notes`, () => {
-      const testNotes = makeNotesArray();
       const testFolders= makeFoldersArray();
       beforeEach("insert folders and notes", () => {
         return db.into('noteful_folders')
@@ -148,6 +154,7 @@ describe("Notes Endpoints", function() {
         return supertest(app)
           .post("/api/notes")
           .send(newNote)
+          .set("Authorization", `Bearer ${API_TOKEN}`)
           .expect(201)
           .expect(res => {
               console.log(res)
@@ -166,6 +173,7 @@ describe("Notes Endpoints", function() {
           .then(postRes =>
             supertest(app)
               .get(`/api/notes/${postRes.body.id}`)
+              .set("Authorization", `Bearer ${API_TOKEN}`)
               .expect(postRes.body)
           );
       });
@@ -184,6 +192,7 @@ describe("Notes Endpoints", function() {
           return supertest(app)
             .post("/api/notes")
             .send(newNote)
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .expect(400, {
               error: { message: `Missing '${field}' in request body` }
             });
@@ -194,6 +203,7 @@ describe("Notes Endpoints", function() {
         return supertest(app)
           .post(`/api/notes`)
           .send(maliciousNote)
+          .set("Authorization", `Bearer ${API_TOKEN}`)
           .expect(201)
           .expect(res => {
             expect(res.body.note_name).to.eql(expectedNote.note_name);
@@ -208,6 +218,7 @@ describe("Notes Endpoints", function() {
           const noteId = 123456;
           return supertest(app)
             .delete(`/api/notes/${noteId}`)
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .expect(404, { error: { message: `Note doesn't exist` } });
         });
       });
@@ -231,10 +242,12 @@ describe("Notes Endpoints", function() {
           );
           return supertest(app)
             .delete(`/api/notes/${idToRemove}`)
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .expect(204)
             .then(res =>
               supertest(app)
                 .get(`/api/notes`)
+                .set("Authorization", `Bearer ${API_TOKEN}`)
                 .expect(expectedNotes)
             );
         });
@@ -246,6 +259,7 @@ describe("Notes Endpoints", function() {
           const noteId = 123456;
           return supertest(app)
             .patch(`/api/notes/${noteId}`)
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .expect(404, { error: { message: `Note doesn't exist` } });
         });
       });
@@ -277,11 +291,13 @@ describe("Notes Endpoints", function() {
           };
           return supertest(app)
             .patch(`/api/notes/${idToUpdate}`)
+            .set("Authorization", `Bearer ${API_TOKEN}`)
             .send(updateNote)
             .expect(204)
             .then(res =>
               supertest(app)
                 .get(`/api/notes/${idToUpdate}`)
+                .set("Authorization", `Bearer ${API_TOKEN}`)
                 .expect(expectedNote)
             );
         });
@@ -290,6 +306,7 @@ describe("Notes Endpoints", function() {
                return supertest(app)
                  .patch(`/api/notes/${idToUpdate}`)
                  .send({ irrelevantField: 'foo' })
+                 .set("Authorization", `Bearer ${API_TOKEN}`)
                  .expect(400, {
                    error: {
                      message: `Request body must content either 'note_name, folder_id, or content'`
@@ -312,10 +329,12 @@ describe("Notes Endpoints", function() {
                           ...updateNote,
                           fieldToIgnore: 'should not be in GET response'
                         })
+                        .set("Authorization", `Bearer ${API_TOKEN}`)
                         .expect(204)
                         .then(res =>
                           supertest(app)
                             .get(`/api/notes/${idToUpdate}`)
+                            .set("Authorization", `Bearer ${API_TOKEN}`)
                             .expect(expectedNote)
                         )
                     })
