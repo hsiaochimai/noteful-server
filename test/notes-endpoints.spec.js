@@ -157,7 +157,6 @@ describe("Notes Endpoints", function() {
           .set("Authorization", `Bearer ${API_TOKEN}`)
           .expect(201)
           .expect(res => {
-              console.log(res)
             expect(res.body.note_name).to.eql(newNote.note_name);
             expect(res.body.folder_id).to.eql(newNote.folder_id)
             expect(res.body.content).to.eql(newNote.content);

@@ -147,7 +147,6 @@ describe.only(`POST /api/folders`, () => {
       .set("Authorization", `Bearer ${API_TOKEN}`)
       .expect(201)
       .expect(res => {
-        console.log(`dfksjdfsljdkf`,res.body)
         expect(res.body.folder_name).to.eql(newFolder.folder_name);
         expect(res.headers.location).to.eql(`/api/folders/${res.body.id}`);
       })
